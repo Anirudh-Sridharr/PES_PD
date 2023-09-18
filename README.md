@@ -256,6 +256,261 @@ Rise transition time = time(slew_high_rise_thr) - time (slew_low_rise_thr)
 Fall transition time = time(slew_high_fall_thr) - time (slew_low_fall_thr)
 ```
 
+## DAY 3 - Design library cell using Magic Layout and ngspice characterization
+
+## Labs for inverter ngspice simulations
+
+IO Placer revision
+PnR is a iterative flow and hence, we can make changes to the environment variables when required.
+For example we can change the  pin configuration along the core from equvi distance randomly placed to someother placement.
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/83069431-583f-4228-9bda-cb47b37015ba)
+
+
+**SPICE deck creation for CMOS inverter**
+
+
+To simulate standard cells  we  need to  create spice deck for our cell.
+The spice deck will contain
+- Component connectivity which include the substrate taps that  tunes the threshold voltage of the MOS
+- Component values like values of PMOS and NMOS, Output load, Input Gate Voltage, supply voltage
+- Node names which  are required to define the SPICE Netlist
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/e70a334f-604f-42ce-81af-986009595de5)
+
+
+**Switching Threshold of a CMOS Inverter**
+CMOS cells have three modes of operation:
+
+Cutoff - No inversion
+Triode - Inversion but no pinchoff in channel
+Saturation - Inversion and pinchoff in channel
+
+The voltages at which the switch between the modes of operation happens is dependent on the threshold voltage of the device. Threshold voltage is a function of the W/L ratio of a device, therefore varying the W/L ratio will vary the output waveform of CMOS devices.
+To enable efficient description of the varying waveforms a single parameter called switching threshold is used. Switching threshold is defined at the intersection of Vin = Vout. 
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/28a7e92a-bbfd-4428-a2c5-748995227b16)
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/93ea6940-f72d-4181-8d61-45bb83130fd3)
+
+
+### *Inception of Layout and CMOS Fabrication Process*
+
+**16 mask CMOS process**
+
+- Substrate Selection: In the initial phase, the appropriate semiconductor substrate is chosen.
+- Create an active region for transistors : to isolate the active regions for transistors SiO2 and Si3N2 deposited. Pockets created using photoresist and lithography.
+- Nwell & Pwell formation : P-well formation involves photolithography and ion implantation of p-type Boron material into the p-substrate.N-well is formed similarly with n-type Phosphorus material.. Drive in 
+  diffusion by placing it in a high temperature furnace.
+- Gate Formationg.A polysilicon layer is deposited and photolithography techniques are applied to create NMOS and PMOS gates
+- Lightly Doped Drain (LDD) formation : LDD done to avoid hot electron effect and short channel effect.
+- Source & Drain Formation: Thin oxide layers are added to avoid channel effects during ion implantation.N+ and P+ implants are performed using Arsenic implantation and high-temperature annealing.
+- Local Interconnect Formation: Thin screen oxide is removed through etching in HF solution.Titanium deposition through sputtering is initiated. Heat treatment results in chemical reactions, producing low-    
+  resistant titanium silicon dioxide for interconnect contacts and titanium nitride for top-level connections, enabling local communication.
+- Higher Level Metal Formation: To achieve suitable metal interconnects, non-planar surface topography is addressed.Chemical Mechanical Polishing (CMP) is utilized by doping silicon oxide with Boron or   
+  Phosphorus to achieve surface planarization.TiN and blanket Tungsten layers are deposited and subjected to CMP.An aluminum (Al) layer is added and subjected to photolithography and CMP
+- Dielectric Layer Addition: Finally, a dielectric layer, typically Si3N4, is applied to safeguard the chip.
+
+
+### **LAB**
+
+Cloning https://github.com/nickson-jose/vsdstdcelldesign.git 
+
+
+
+
+command for layout
+```
+magic -T sky130A.tech sky130_inv.mag &
+```
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/49e9db46-f491-4b02-940e-073314e4a465)
+
+Click on the component and type ```what``` in the tkcon window
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/26bb651d-da09-4199-a2b9-c5ecb8253425)
+
+_**DRC Errors**_
+
+DRC errors in magic will be highlighted with white dotted lines:
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/7e023b4b-2c28-473d-a879-029feeb593a1)
+
+To identify DRC errors select DRC find next error:
+it will be displayed on the tkcon window
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/5a339793-7050-4f7f-94f2-9eefaa3f9073)
+
+_**Extracting to SPICE**_
+Command 
+```
+extract all
+ext2spice cthresh 0 rthresh 0
+```
+cthresh and rthresh are used to extract all parasatic capacitances.
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/1bbef24c-f86b-4b54-b9e5-e70fc9edd21d)
+
+
+SPICE file 
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/9665e29b-cb88-4aa6-a408-e26a520628f3)
+
+
+**Spice Wrapper for Simulation**
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/0140489c-834e-4ffe-a6e6-6e19b2cf9091)
+
+
+**NGPSICE**
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/e9c1c6e3-db9b-4a67-90c0-3130db690dca)
+
+
+Next we type the command 
+```
+plot y vs time a
+```
+
+**WAVEFORM**
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/5b1f8fb1-24b1-4ae9-bb40-cd9ceffded75)
+
+
+## Sky130 Tech File Labs
+
+**Introduction to Magic tool options and DRC rules**
+
+(refer:http://opencircuitdesign.com/magic/)
+Magic is a venerable VLSI layout tool, written in the 1980's at Berkeley by John Ousterhout, now famous primarily for writing the scripting interpreter language Tcl. Due 
+largely in part to its liberal Berkeley open-source license, magic has remained popular with universities and small companies. The open-source license has allowed VLSI 
+engineers with a bent toward programming to implement clever ideas and help magic stay abreast of fabrication technology. However, it is the well thought-out core algorithms 
+which lend to magic the greatest part of its popularity. Magic is widely cited as being the easiest tool to use for circuit layout, even for people who ultimately rely on 
+commercial tools for their product design flow.
+
+
+Drc section
+The design rules used by Magic's design rule checker come entirely from the technology file. We'll look first at two simple kinds of rules, width and and spacing. Most of the 
+rules in the drc section are one or the other of these kinds of rules.
+
+
+SKY130 pdk
+SKY130 is a mature 180nm-130nm hybrid technology developed by Cypress Semiconductor that has been used for many production parts. SKY130 is now available as a foundry 
+technology through SkyWater Technology Foundry.
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/37b78da5-b313-47a1-ae9d-6d92911cab33)
+
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/04b4381b-b92f-40ed-a403-09c0be903743)
+
+
+
+
+Commands to open magic 
+```
+magic -d XR
+```
+
+Then we open the met3.mag file
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/e746a4b8-cd4b-442e-8916-2bc8fdce4c9e)
+
+
+
+To check which DRC rule is being violated select area and type drc why in tkcon 
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/be24dcd6-9893-4c5a-b2d1-5b2061b9370c)
+
+
+
+to add contact cuts 
+add met3 contact by selecting area and clicking on m3contact using middle mouse button.
+then type ``` cif see VIA2``` in tkcon prompt
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/075377c5-4aa4-4583-9656-d0e87d5ab95a)
+
+
+
+To fix errors
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/25ecd4e0-a818-478b-bd23-9832bf88d536)
+
+the error is 
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/46257981-a308-4be5-b684-ddedb0defc79)
+
+
+
+To fix the error open the sky130A.tech file using a editor and search for poly.9 and make the changes
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/b78688b0-689a-4f18-af77-198c087daf32)
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/46d73847-29cc-4171-9746-1bb51090b71c)
+
+
+Now load the sky130A.tech file again and type the command ```drc check```
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/5fe12345-e777-4215-9a15-c807b4d7ccae)
+
+
+
+We can see the error is fixed 
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/d843fa0a-45f0-45f8-a148-f28fc61f7dee)
+
+
+
+**DRC error as geometrical construct**
+
+Open the nwell.mag file in magic. Seletch the nwell.6 and type the commands
+```
+cif ostyle drc
+cif see dnwell_shrink
+cif see dnwell_missing
+```
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/5df2c37d-8812-4b99-9354-75df1b87f133)
+
+
+Output 
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/a53fd631-d968-49ba-a1c2-3a839c7b2111)
+
+
+**to find missing or incorrect rules and fix them**
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/3e68f2b7-5a31-4d46-b207-a65629b9c197)
+
+
+ERROR
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/5b0b494d-4797-4da7-8340-9355e7f0a0d5)
+
+To fix make the changes 
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/0325097c-4ff8-4461-8063-34d274c1cf48)
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/8cd1215a-bf4f-4fa6-910b-eaad60d19c20)
+
+
+Now load the sky130A.tech file and type the command ```drc check```  for both normal and drc fast 
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/a843d9f6-ead2-45fc-81df-22d46b651bc4)
+
+
+![image](https://github.com/Anirudh-Ravi123/pes_pd/assets/142154804/2cf31443-e887-4c36-9237-8ba889cab2fd)
 
 
 

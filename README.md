@@ -1,4 +1,4 @@
-![image](https://github.com/Anirudh-Sridharr/PES_PD/assets/140473803/2bb91527-a213-4ff5-82e5-42ed511c4c49)# PES_PD
+# PES_PD
 ## ASIC Physical design course repository
 
 Ok so what is a chip from the inside?
